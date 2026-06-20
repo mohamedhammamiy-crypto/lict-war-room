@@ -1488,7 +1488,8 @@ $('fileProg').addEventListener('change',e=>{
   rd.readAsArrayBuffer(f);
 });
 // ---- live online sheet (Google Sheets) ----
-let LIVEURL = lsGet('lict_sheet_url')||null;
+const DEFAULT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1JXPhMg5mBaH89Y_52_H0g-H0-g3X7IGfnBAOXZyLBh0/edit?gid=881904644';
+let LIVEURL = lsGet('lict_sheet_url')||DEFAULT_SHEET_URL;
 let LASTSYNC = null, SYNCTIMER = null;
 function candidates(u){
   u=String(u).trim();
@@ -1972,7 +1973,8 @@ $('hfileProg').addEventListener('change',e=>{
 });
 
 /* ───────── live Google Sheet sync ───────── */
-let LIVEURL = lsGet('hua_sheet_url')||null;
+const DEFAULT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1gmS1wc2ektcbS2SgnnnHPKPwBv6W-_2VqTeSdTHm390/edit?gid=0';
+let LIVEURL = lsGet('hua_sheet_url')||DEFAULT_SHEET_URL;
 let LASTSYNC = null, SYNCTIMER = null;
 function candidates(u){
   u=String(u).trim();
@@ -2560,7 +2562,8 @@ $('nfileProg').addEventListener('change',e=>{
 });
 
 /* ───────── live Google Sheet sync ───────── */
-let LIVEURL = lsGet('nok_sheet_url')||null;
+const DEFAULT_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1imQp2MDy9EBhxM_XGGoDJfiKzLSmtxNuTw0MP0R7bFo/edit?gid=0';
+let LIVEURL = lsGet('nok_sheet_url')||DEFAULT_SHEET_URL;
 let LASTSYNC = null, SYNCTIMER = null;
 function candidates(u){
   u=String(u).trim();
