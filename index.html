@@ -721,11 +721,11 @@ footer{margin-top:26px;color:var(--faint);font-size:11.5px;border-top:1px solid 
     </div>
     <div class="filters" id="hfilterBar">
       <div class="msel" data-f="grp"></div>
-      <div class="msel" data-f="rg"></div>
       <div class="msel" data-f="st"></div>
       <div class="msel" data-f="tt"></div>
       <div class="msel" data-f="sta"></div>
-      <div class="msel" data-f="oa"></div>
+      <div class="msel" data-f="star"></div>
+      <div class="msel" data-f="tl"></div>
       <div class="msel" data-f="rfi"></div>
       <input id="hfSearch" type="search" placeholder="Search site name…">
       <button class="fbtn" id="hfReset">Reset</button>
@@ -1072,22 +1072,56 @@ function refreshCoverStats(){
   if(el('hua-bar')) setTimeout(function(){el('hua-bar').style.width=Math.round(100*hh.oa/123)+'%';},200);
 
   try{
-    var nokData=window.__nokiaBaseData||[];
-    var nokOv=JSON.parse(localStorage.getItem('nok_overrides')||'null')||{};
-    if(nokData.length>0){
-      var nSur=0,nTn=0,nTl=0,nSta=0;
-      nokData.forEach(function(r){
-        var p=nokOv[r.n.toUpperCase()]||r;
-        if((p.sur||r.sur)==='Done') nSur++;
-        if((p.tn||r.tn)==='Done') nTn++;
-        if((p.tl||r.tl)==='Validated') nTl++;
-        if((p.sta||r.sta)==='Need STA') nSta++;
-      });
-      if(el('nok-sur')) el('nok-sur').textContent=nSur||'—';
-      if(el('nok-tn'))  el('nok-tn').textContent =nTn ||'—';
-      if(el('nok-tl'))  el('nok-tl').textContent =nTl ||'—';
-      if(el('nok-sta')) el('nok-sta').textContent=nSta||'—';
+    // Nokia: merge base static counts with live overrides from localStorage
+    // Base counts (from static nokia_sites.json): sur=168, tn=99, tl=23, sta=94
+    var nokBase = { sur:168, tn:99, tl:23, sta:94 };
+    var nokOv = JSON.parse(localStorage.getItem('nok_overrides')||'null')||{};
+    var nokKeys = Object.keys(nokOv);
+    if(nokKeys.length > 0){
+      // For each site in overrides, compare with base and compute delta
+      var nSur=0, nTn=0, nTl=0, nSta=0;
+      // Use __nokiaBaseData if available (Nokia page was visited), else estimate from overrides only
+      var baseData = window.__nokiaBaseData || null;
+      if(baseData && baseData.length>0){
+        baseData.forEach(function(r){
+          var p = nokOv[r.n.toUpperCase()];
+          var sur = p ? p.sur : r.sur;
+          var tn  = p ? p.tn  : r.tn;
+          var tl  = p ? p.tl  : r.tl;
+          var sta = p ? p.sta : r.sta;
+          if(sur==='Done') nSur++;
+          if(tn==='Done')  nTn++;
+          if(tl==='Validated') nTl++;
+          if(sta==='Need STA') nSta++;
+        });
+      } else {
+        // Nokia page not visited yet — use base counts plus override deltas
+        // Count what overrides say for matched sites
+        var ovSur=0, ovTn=0, ovTl=0, ovSta=0, ovCount=nokKeys.length;
+        nokKeys.forEach(function(k){
+          var p=nokOv[k];
+          if(p.sur==='Done') ovSur++;
+          if(p.tn==='Done')  ovTn++;
+          if(p.tl==='Validated') ovTl++;
+          if(p.sta==='Need STA') ovSta++;
+        });
+        nSur = ovSur;
+        nTn  = ovTn;
+        nTl  = ovTl;
+        nSta = ovSta;
+      }
+      if(el('nok-sur')) el('nok-sur').textContent = nSur||'—';
+      if(el('nok-tn'))  el('nok-tn').textContent  = nTn ||'—';
+      if(el('nok-tl'))  el('nok-tl').textContent  = nTl ||'—';
+      if(el('nok-sta')) el('nok-sta').textContent  = nSta||'—';
       if(el('nok-bar')) setTimeout(function(){el('nok-bar').style.width=Math.round(100*nTl/204)+'%';},200);
+    } else {
+      // No overrides yet — show base static values
+      if(el('nok-sur')) el('nok-sur').textContent = nokBase.sur;
+      if(el('nok-tn'))  el('nok-tn').textContent  = nokBase.tn;
+      if(el('nok-tl'))  el('nok-tl').textContent  = nokBase.tl;
+      if(el('nok-sta')) el('nok-sta').textContent  = nokBase.sta;
+      if(el('nok-bar')) setTimeout(function(){el('nok-bar').style.width=Math.round(100*nokBase.tl/204)+'%';},200);
     }
   }catch(e){}
 }
@@ -1225,8 +1259,8 @@ function draw(){
   }
   if(!window.__zmap){
     window.__zmap = L.map('zmap', {scrollWheelZoom:false}).setView([32.7,12.4],9);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-      maxZoom:18, attribution:'© OpenStreetMap contributors'
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
+      maxZoom:19, attribution:'© OpenStreetMap contributors © CARTO'
     }).addTo(window.__zmap);
     window.__zmapMarkers = L.layerGroup().addTo(window.__zmap);
     setTimeout(()=>window.__zmap.invalidateSize(),200);
@@ -1545,6 +1579,7 @@ async function syncSheet(silent){
     LASTSYNC=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
     $('connectMsg').textContent=''; $('connectBox').style.display='none';
     renderProgress(); draw();
+    if(typeof refreshCoverStats==="function") refreshCoverStats();
     return true;
   }
   let msg;
@@ -1649,11 +1684,11 @@ const fmt = n => n.toLocaleString('en-US');
 /* ───────── cascading multiselect filters ───────── */
 const FILTERS=[
  {id:'grp', label:'Group', short:'Group', opts:[['Main','Main scope (103)'],['Backup','Backup (20)']], test:(r,v)=>r.grp===v},
- {id:'rg', label:'Area', short:'Area', opts:[['TRI','TRI sites'],['TPL','TPL sites']], test:(r,v)=>r.rg===v},
  {id:'st', label:'Site type', short:'Site type', opts:[['Roof Top','Roof Top'],['Ground Tower','Ground Tower'],['No Info','No Info']], test:(r,v)=>r.st===v},
  {id:'tt', label:'Tower type', short:'Tower type', opts:[['Pole Tower','Pole Tower'],['Stub Tower','Stub Tower'],['Guyed Mast','Guyed Mast'],['SST','SST'],['Mono Pole','Mono Pole'],['Wall Pole Tower','Wall Pole Tower'],['No Info','No Info']], test:(r,v)=>r.tt===v},
  {id:'sta', label:'STA', short:'STA', opts:[['Need STA','Need STA'],['No Need STA','No Need STA'],['No Info','No Info']], test:(r,v)=>r.sta===v},
- {id:'oa', label:'On Air', short:'On Air', opts:[['1','On Air'],['0','Not yet']], test:(r,v)=>String(r.oa)===v},
+ {id:'star', label:'STA Report', short:'STA Report', opts:[['done','Done'],['pending','Pending']], test:(r,v)=>{const p=SITEPROG&&SITEPROG[r.n.toUpperCase()];return v==='done'?!!(p&&p.star):!(p&&p.star);}},
+ {id:'tl', label:'STA Result', short:'STA Result', opts:[['Validated','Validated'],['Not Started','Not Started'],['Pending','Pending']], test:(r,v)=>{const p=SITEPROG&&SITEPROG[r.n.toUpperCase()];return (p?p.tl:'Pending')===v;}},
  {id:'rfi', label:'RFI', short:'RFI', opts:[['any','RFI (CW + Trans)'],['cw','RFI CW'],['tr','RFI Trans']], test:(r,v)=>{const p=SITEPROG&&SITEPROG[r.n.toUpperCase()];if(!p)return false;return v==='any'?(p.rfi||(p.rfi_cw&&p.rfi_tr)):v==='cw'?p.rfi_cw:p.rfi_tr;}},
 ];
 const FSEL={}; FILTERS.forEach(f=>FSEL[f.id]=new Set());
@@ -1704,11 +1739,8 @@ function kpis(d){
   const items=[
     {l:'Sites in scope', v:d.length, d:`Main ${d.filter(r=>r.grp==='Main').length} · Backup ${d.filter(r=>r.grp==='Backup').length}`, c:HUA},
     {l:'Need STA', v:d.filter(r=>r.sta==='Need STA').length, d:`${d.length?Math.round(100*d.filter(r=>r.sta==='Need STA').length/d.length):0}% of selection`, c:C.red},
-    {l:'On Air', v:d.filter(r=>r.oa).length, d:`${d.length?Math.round(100*d.filter(r=>r.oa).length/d.length):0}% of selection`, c:C.green},
-    {l:'Roof Top', v:d.filter(r=>r.st==='Roof Top').length, d:'Site type', c:C.blue},
-    {l:'Ground Tower', v:d.filter(r=>r.st==='Ground Tower').length, d:'Site type', c:C.amber},
-    {l:'Avg antenna height', v:d.length?Math.round(10*d.reduce((a,r)=>a+r.ant,0)/d.length)/10:0, d:'meters', c:C.cyan},
-    {l:'Backup sites', v:d.filter(r=>r.grp==='Backup').length, d:'reserve pool', c:C.gray},
+    {l:'STA Report', v:SITEPROG?Object.values(SITEPROG).filter(p=>p.star).length:0, d:`${d.length?Math.round(100*(SITEPROG?Object.values(SITEPROG).filter(p=>p.star).length:0)/d.length):0}% of selection`, c:C.amber},
+    {l:'STA Result', v:SITEPROG?Object.values(SITEPROG).filter(p=>p.tl==='Validated'||p.tl==='Pass').length:0, d:`${d.length?Math.round(100*(SITEPROG?Object.values(SITEPROG).filter(p=>p.tl==='Validated'||p.tl==='Pass').length:0)/d.length):0}% of selection`, c:C.cyan},
     {l:'RFI', v:ac.rfi||0, d:'CW + Trans complete', c:'#7c3aed'},
   ];
   $('hkpis').innerHTML = items.map(i=>
@@ -1743,8 +1775,8 @@ function draw(){
 
   if(!window.__hmap){
     window.__hmap = L.map('hmap', {scrollWheelZoom:false}).setView([32.875,13.18],11);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-      maxZoom:18, attribution:'© OpenStreetMap contributors'
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
+      maxZoom:19, attribution:'© OpenStreetMap contributors © CARTO'
     }).addTo(window.__hmap);
     window.__hmapMarkers = L.layerGroup().addTo(window.__hmap);
     setTimeout(()=>window.__hmap.invalidateSize(),200);
@@ -1857,6 +1889,15 @@ function lsSet(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch(e){} }
 let PROG=lsGet('hua_progress')||{};
 let SITEPROG=lsGet('hua_siteprog')||null;
 
+// Migration: clear stale SITEPROG that's missing 7-stage keys
+if(SITEPROG){
+  const sample=Object.values(SITEPROG)[0]||{};
+  if(sample.tssr===undefined || sample.star===undefined || sample.acc===undefined){
+    SITEPROG=null;
+    try{localStorage.removeItem('hua_siteprog');}catch(e){}
+  }
+}
+
 function stage(n){
   const p=SITEPROG&&SITEPROG[n];
   if(!p) return 'Pending';
@@ -1876,9 +1917,10 @@ function progChip(n){
   return s==='Pending'?'<span class="muted">Pending</span>':`<span class="chip ${cls}">${s}</span>`;
 }
 function autoCounts(){
-  const c={sur:0,tssr:0,sta:0,star:0,ins:0,oa:0,acc:0,rfi_cw:0,rfi_tr:0,rfi:0};
+  const c={sur:0,tssr:0,sta:0,star:0,tl:0,ins:0,oa:0,acc:0,rfi_cw:0,rfi_tr:0,rfi:0};
   if(SITEPROG) Object.values(SITEPROG).forEach(p=>{
     c.sur+=p.sur?1:0; c.tssr+=p.tssr?1:0; c.sta+=p.sta?1:0; c.star+=p.star?1:0;
+    c.tl+=(p.tl==='Validated'||p.tl==='Pass')?1:0;
     c.ins+=p.ins?1:0; c.oa+=p.oa?1:0; c.acc+=p.acc?1:0;
     c.rfi_cw+=p.rfi_cw?1:0; c.rfi_tr+=p.rfi_tr?1:0;
     c.rfi+=(p.rfi||(p.rfi_cw&&p.rfi_tr))?1:0;
@@ -1922,11 +1964,11 @@ const DONE=v=>{
   return s!=='' && !['no','n','0','pending','open','-','—','false','not yet','tbd','na','n/a'].includes(s);
 };
 function parseTracker(rows){
-  // Huawei tracker layout:
+  // Huawei tracker layout (from live Google Sheet):
   //   A=SID, B=On-Air, C=LAT, D=LONG, E=Solution, F=City, G=Ant Height,
   //   H=Site Type, I=Tower Type, J=Tower Height, K=Area,
-  //   L=STA required, M=STA (Done), N=STA report, O=Survey, P=TSSR (old),
-  //   Q=TSSR, R=RFI CW, S=RFI Trans, T=RFI, U=I&C, V=Acceptance
+  //   L=STA request, M=STA (Done), N=STA report, O=STA Result,
+  //   P=Survey, Q=TSSR, R=RFI CW, S=RFI Trans, T=RFI, U=I&C, V=Acceptance
   const names=new Set(DATA.map(r=>r.n.toUpperCase()));
   const out={}; let matched=0;
   rows.forEach(r=>{
@@ -1934,10 +1976,11 @@ function parseTracker(rows){
     if(!names.has(n)) return;
     matched++;
     out[n]={
-      sur:  DONE(r.O),
-      tssr: DONE(r.Q)||DONE(r.P),
+      sur:  DONE(r.P),
+      tssr: DONE(r.Q),
       sta:  DONE(r.M),
       star: DONE(r.N),
+      tl:   (r.O==='Pass'||r.O==='Validated')?'Validated':(r.O?r.O:'Pending'),
       ins:  DONE(r.U),
       oa:   DONE(r.B),
       acc:  DONE(r.V),
@@ -2066,6 +2109,7 @@ async function syncSheet(silent){
     LASTSYNC=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
     $('hconnectMsg').textContent=''; $('hconnectBox').style.display='none';
     renderProgress(); draw();
+    if(typeof refreshCoverStats==="function") refreshCoverStats();
     return true;
   }
   let msg;
@@ -2300,8 +2344,8 @@ function draw(){
 
   if(!window.__nmap){
     window.__nmap = L.map('nmap', {scrollWheelZoom:false}).setView([32.38,15.02],11);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-      maxZoom:18, attribution:'© OpenStreetMap contributors'
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
+      maxZoom:19, attribution:'© OpenStreetMap contributors © CARTO'
     }).addTo(window.__nmap);
     window.__nmapMarkers = L.layerGroup().addTo(window.__nmap);
     setTimeout(()=>window.__nmap.invalidateSize(),200);
@@ -2654,6 +2698,7 @@ async function syncSheet(silent){
     LASTSYNC=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
     $('nconnectMsg').textContent=''; $('nconnectBox').style.display='none';
     renderProgress(); draw();
+    if(typeof refreshCoverStats==="function") refreshCoverStats();
     return true;
   }
   let msg;
