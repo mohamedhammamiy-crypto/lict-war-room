@@ -808,32 +808,7 @@ body:not(.authed) #logoutBtn{display:none}
       <div class="legend" id="hlgRings"></div>
     </div>
 
-    <div class="card c4">
-      <h3>Site status</h3>
-      <div class="ch"><canvas id="hchStatus"></canvas></div>
-      <div class="legend" id="hlgStatus"></div>
-    </div>
-
-    <div class="card c4">
-      <h3>Tower type breakdown</h3>
-      <div class="ch"><canvas id="hchTowerType"></canvas></div>
-    </div>
-
-    <div class="card c4">
-      <h3>Site type <em>roof top vs ground</em></h3>
-      <div class="ch"><canvas id="hchSiteType"></canvas></div>
-      <div class="legend" id="hlgSiteType"></div>
-    </div>
-
-    <div class="card c6">
-      <h3>Antenna height distribution <em>meters</em></h3>
-      <div class="ch"><canvas id="hchAntenna"></canvas></div>
-    </div>
-
-    <div class="card c6">
-      <h3>Tower height distribution <em>meters</em></h3>
-      <div class="ch"><canvas id="hchTowerHeight"></canvas></div>
-    </div>
+    <!-- Site status / Tower type breakdown / Site type / Antenna & Tower height charts removed (2026-09) — may be replaced with different charts later -->
 
     <div class="card c12">
       <h3>Site register <em id="htblNote"></em></h3>
@@ -1843,44 +1818,7 @@ function draw(){
     $('hlgRings').innerHTML=RINGS.map(r=>`<span><i style="background:${r.color}"></i>${r.label} <b style="color:var(--txt)">${r.value}</b> <span class="muted">${Math.round(100*r.value/r.total)}%</span></span>`).join('');
   })();
 
-  /* site status donut: On Air / STA pending / Ready not on air */
-  const onAir=d.filter(r=>r.oa).length;
-  const needSta=d.filter(r=>!r.oa && r.sta==='Need STA').length;
-  const ready=d.length-onAir-needSta;
-  mk('chStatus',{type:'doughnut',data:{labels:['On Air','Need STA','Other'],datasets:[{data:[onAir,needSta,ready],backgroundColor:[C.green,C.red,C.gray],borderColor:'#ffffff',borderWidth:2}]},
-    options:{maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false}}}});
-  $('hlgStatus').innerHTML=[['On Air',C.green,onAir],['Need STA',C.red,needSta],['Other',C.gray,ready]]
-    .map(([l,c,v])=>`<span><i style="background:${c}"></i>${l} <b style="color:var(--txt)">${v}</b></span>`).join('');
-
-  /* tower type breakdown */
-  const ttCount={};
-  d.forEach(r=>{ttCount[r.tt]=(ttCount[r.tt]||0)+1;});
-  const tte=Object.entries(ttCount).sort((a,b)=>b[1]-a[1]);
-  mk('chTowerType',{type:'bar',data:{labels:tte.map(e=>e[0]),datasets:[{data:tte.map(e=>e[1]),backgroundColor:tte.map(e=>e[0]==='No Info'?C.gray+'99':HUA+'cc'),borderRadius:4}]},
-    options:{indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:C.line}},y:{grid:{display:false}}}}});
-
-  /* site type donut */
-  const stCount={'Roof Top':0,'Ground Tower':0,'No Info':0};
-  d.forEach(r=>stCount[r.st]=(stCount[r.st]||0)+1);
-  mk('chSiteType',{type:'doughnut',data:{labels:Object.keys(stCount),datasets:[{data:Object.values(stCount),backgroundColor:[C.blue,C.amber,C.gray],borderColor:'#ffffff',borderWidth:2}]},
-    options:{maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false}}}});
-  $('hlgSiteType').innerHTML=[['Roof Top',C.blue],['Ground Tower',C.amber],['No Info',C.gray]]
-    .map(([l,c])=>`<span><i style="background:${c}"></i>${l} <b style="color:var(--txt)">${stCount[l]}</b></span>`).join('');
-
-  /* antenna height distribution */
-  const antBins=[[0,15,'<15'],[15,20,'15-20'],[20,25,'20-25'],[25,30,'25-30'],[30,40,'30-40'],[40,200,'40+']];
-  const antCounts=antBins.map(([lo,hi])=>d.filter(r=>r.ant>=lo&&r.ant<hi).length);
-  mk('chAntenna',{type:'bar',data:{labels:antBins.map(b=>b[2]),datasets:[{data:antCounts,backgroundColor:C.cyan+'cc',borderRadius:4}]},
-    options:{maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:C.line}},x:{grid:{display:false}}}}});
-
-  /* tower height distribution */
-  const thBins=[[0,10,'<10'],[10,20,'10-20'],[20,40,'20-40'],[40,60,'40-60'],[60,200,'60+'],[null,null,'No Info']];
-  const thCounts=thBins.map(([lo,hi])=>{
-    if(lo===null) return d.filter(r=>r.th==null).length;
-    return d.filter(r=>r.th!=null && r.th>=lo && r.th<hi).length;
-  });
-  mk('chTowerHeight',{type:'bar',data:{labels:thBins.map(b=>b[2]),datasets:[{data:thCounts,backgroundColor:C.amber+'cc',borderRadius:4}]},
-    options:{maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:C.line}},x:{grid:{display:false}}}}});
+  /* Site status donut / Tower type breakdown / Site type donut / Antenna & Tower height distribution charts removed (2026-09) — may be replaced with different charts later */
 
   /* table */
   const cap=150, show=d.slice(0,cap);
