@@ -1232,8 +1232,11 @@ function draw(){
   }
   if(!window.__zmap){
     window.__zmap = L.map('zmap', {scrollWheelZoom:false}).setView([32.7,12.4],9);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
-      maxZoom:19, attribution:'© OpenStreetMap contributors © CARTO'
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',{
+      maxZoom:16, attribution:'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ'
+    }).addTo(window.__zmap);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',{
+      maxZoom:16
     }).addTo(window.__zmap);
     window.__zmapMarkers = L.layerGroup().addTo(window.__zmap);
     setTimeout(()=>window.__zmap.invalidateSize(),200);
@@ -1748,8 +1751,11 @@ function draw(){
 
   if(!window.__hmap){
     window.__hmap = L.map('hmap', {scrollWheelZoom:false}).setView([32.875,13.18],11);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
-      maxZoom:19, attribution:'© OpenStreetMap contributors © CARTO'
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',{
+      maxZoom:16, attribution:'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ'
+    }).addTo(window.__hmap);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',{
+      maxZoom:16
     }).addTo(window.__hmap);
     window.__hmapMarkers = L.layerGroup().addTo(window.__hmap);
     setTimeout(()=>window.__hmap.invalidateSize(),200);
@@ -2280,8 +2286,11 @@ function draw(){
 
   if(!window.__nmap){
     window.__nmap = L.map('nmap', {scrollWheelZoom:false}).setView([32.38,15.02],11);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
-      maxZoom:19, attribution:'© OpenStreetMap contributors © CARTO'
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',{
+      maxZoom:16, attribution:'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ'
+    }).addTo(window.__nmap);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}',{
+      maxZoom:16
     }).addTo(window.__nmap);
     window.__nmapMarkers = L.layerGroup().addTo(window.__nmap);
     setTimeout(()=>window.__nmap.invalidateSize(),200);
