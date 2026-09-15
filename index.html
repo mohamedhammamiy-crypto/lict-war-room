@@ -288,9 +288,37 @@ footer{margin-top:26px;color:var(--faint);font-size:11.5px;border-top:1px solid 
 #pg-zte .active-proj:hover{background:rgba(29,111,235,.10)!important}
 #pg-huawei .active-proj:hover{background:rgba(199,0,11,.10)!important}
 #pg-nokia .active-proj:hover{background:rgba(18,65,145,.10)!important}
+
+/* ── access control: admin-only sync/edit controls hidden unless logged in as admin ── */
+body:not(.role-admin) .admin-only{display:none!important}
+#authGate{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#0b1220,#152238);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif}
+body.authed #authGate{display:none}
+#authGate .box{width:min(340px,90vw);background:#fff;border-radius:14px;padding:28px 26px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+#authGate h2{margin:0 0 4px;font-size:18px;color:#0f172a}
+#authGate p{margin:0 0 18px;font-size:12.5px;color:#64748b;line-height:1.5}
+#authGate input{width:100%;box-sizing:border-box;padding:10px 12px;font-size:14px;border:1px solid #dbe2ea;border-radius:8px;outline:none;margin-bottom:10px}
+#authGate input:focus{border-color:#1d6feb}
+#authGate button{width:100%;padding:10px 12px;font-size:14px;font-weight:600;color:#fff;background:#1d6feb;border:none;border-radius:8px;cursor:pointer}
+#authGate button:hover{background:#155bc9}
+#authGate .err{color:#dc2626;font-size:12px;margin:-2px 0 10px;min-height:14px}
+#logoutBtn{position:fixed;right:10px;bottom:10px;z-index:9998;font-size:11px;color:#94a3b8;background:rgba(15,23,42,.06);border:none;border-radius:6px;padding:5px 9px;cursor:pointer;font-family:inherit}
+#logoutBtn:hover{color:#334155;background:rgba(15,23,42,.12)}
+body:not(.authed) #logoutBtn{display:none}
 </style>
 </head>
 <body>
+<div id="authGate">
+  <div class="box">
+    <h2>Single RAN JV War Room</h2>
+    <p>Enter your access password. Admin can sync/edit data sources; User is view-only.</p>
+    <form id="authForm" autocomplete="off">
+      <input type="password" id="authPw" placeholder="Password" autofocus>
+      <div class="err" id="authErr"></div>
+      <button type="submit">Enter</button>
+    </form>
+  </div>
+</div>
+<button id="logoutBtn" title="Log out and return to the password screen">Log out</button>
 <div id="pg-cover"><div class="wrap">
   <header style="justify-content:center;text-align:center">
     <div class="htxt">
@@ -581,14 +609,14 @@ footer{margin-top:26px;color:var(--faint);font-size:11.5px;border-top:1px solid 
       <span style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;flex-wrap:wrap">
         <span style="font:600 10px var(--mono);color:#fff;background:var(--blue);border-radius:4px;padding:2px 6px">SYNC v17</span>
         <em id="progSrc">manual mode</em>
-        <button class="fbtn" id="btnConnect" style="padding:4px 10px">Connect online sheet</button>
-        <button class="fbtn" id="btnSync" style="padding:4px 10px;display:none">Sync now</button>
-        <button class="fbtn" id="btnLoad" style="padding:4px 10px">Load file</button>
-        <button class="fbtn" id="btnClear" style="padding:4px 10px;display:none">Disconnect</button>
-        <input type="file" id="fileProg" accept=".xlsx,.xls,.csv" style="display:none">
+        <button class="fbtn admin-only" id="btnConnect" style="padding:4px 10px">Connect online sheet</button>
+        <button class="fbtn admin-only" id="btnSync" style="padding:4px 10px;display:none">Sync now</button>
+        <button class="fbtn admin-only" id="btnLoad" style="padding:4px 10px">Load file</button>
+        <button class="fbtn admin-only" id="btnClear" style="padding:4px 10px;display:none">Disconnect</button>
+        <input type="file" id="fileProg" class="admin-only" accept=".xlsx,.xls,.csv" style="display:none">
       </span>
     </h3>
-    <div id="connectBox" style="display:none;margin:0 0 12px;padding:10px;border:1px dashed var(--line);border-radius:8px;background:var(--panel2)">
+    <div id="connectBox" class="admin-only" style="display:none;margin:0 0 12px;padding:10px;border:1px dashed var(--line);border-radius:8px;background:var(--panel2)">
       <div style="font-size:12px;color:var(--dim);margin-bottom:6px">Paste your Google Sheets link (the tracker must be shared as <b>“Anyone with the link – Viewer”</b>, or published to the web):</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <input id="sheetUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/…" style="flex:1;min-width:260px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:7px 10px;font-size:13px;color:var(--txt);outline:none">
@@ -741,14 +769,14 @@ footer{margin-top:26px;color:var(--faint);font-size:11.5px;border-top:1px solid 
     <h3>Rollout progress
       <span style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;flex-wrap:wrap">
         <em id="hprogSrc">manual mode</em>
-        <button class="fbtn" id="hbtnConnect" style="padding:4px 10px">Connect online sheet</button>
-        <button class="fbtn" id="hbtnSync" style="padding:4px 10px;display:none">Sync now</button>
-        <button class="fbtn" id="hbtnLoad" style="padding:4px 10px">Load file</button>
-        <button class="fbtn" id="hbtnClear" style="padding:4px 10px;display:none">Disconnect</button>
-        <input type="file" id="hfileProg" accept=".xlsx,.xls,.csv" style="display:none">
+        <button class="fbtn admin-only" id="hbtnConnect" style="padding:4px 10px">Connect online sheet</button>
+        <button class="fbtn admin-only" id="hbtnSync" style="padding:4px 10px;display:none">Sync now</button>
+        <button class="fbtn admin-only" id="hbtnLoad" style="padding:4px 10px">Load file</button>
+        <button class="fbtn admin-only" id="hbtnClear" style="padding:4px 10px;display:none">Disconnect</button>
+        <input type="file" id="hfileProg" class="admin-only" accept=".xlsx,.xls,.csv" style="display:none">
       </span>
     </h3>
-    <div id="hconnectBox" style="display:none;margin:0 0 12px;padding:10px;border:1px dashed var(--line);border-radius:8px;background:var(--panel2)">
+    <div id="hconnectBox" class="admin-only" style="display:none;margin:0 0 12px;padding:10px;border:1px dashed var(--line);border-radius:8px;background:var(--panel2)">
       <div style="font-size:12px;color:var(--dim);margin-bottom:6px">Paste your Google Sheets link (the tracker must be shared as <b>“Anyone with the link – Viewer”</b>, or published to the web):</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <input id="hsheetUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/…" style="flex:1;min-width:260px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:7px 10px;font-size:13px;color:var(--txt);outline:none">
@@ -896,14 +924,14 @@ footer{margin-top:26px;color:var(--faint);font-size:11.5px;border-top:1px solid 
     <h3>Rollout progress
       <span style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;flex-wrap:wrap">
         <em id="nprogSrc"></em>
-        <button class="fbtn" id="nbtnConnect" style="padding:4px 10px">Connect online sheet</button>
-        <button class="fbtn" id="nbtnSync" style="padding:4px 10px;display:none">Sync now</button>
-        <button class="fbtn" id="nbtnLoad" style="padding:4px 10px">Load updated tracker</button>
-        <button class="fbtn" id="nbtnClear" style="padding:4px 10px;display:none">Disconnect</button>
-        <input type="file" id="nfileProg" accept=".xlsx,.xls,.csv" style="display:none">
+        <button class="fbtn admin-only" id="nbtnConnect" style="padding:4px 10px">Connect online sheet</button>
+        <button class="fbtn admin-only" id="nbtnSync" style="padding:4px 10px;display:none">Sync now</button>
+        <button class="fbtn admin-only" id="nbtnLoad" style="padding:4px 10px">Load updated tracker</button>
+        <button class="fbtn admin-only" id="nbtnClear" style="padding:4px 10px;display:none">Disconnect</button>
+        <input type="file" id="nfileProg" class="admin-only" accept=".xlsx,.xls,.csv" style="display:none">
       </span>
     </h3>
-    <div id="nconnectBox" style="display:none;margin:0 0 12px;padding:10px;border:1px dashed var(--line);border-radius:8px;background:var(--panel2)">
+    <div id="nconnectBox" class="admin-only" style="display:none;margin:0 0 12px;padding:10px;border:1px dashed var(--line);border-radius:8px;background:var(--panel2)">
       <div style="font-size:12px;color:var(--dim);margin-bottom:6px">Paste your Google Sheets link (the tracker must be shared as <b>“Anyone with the link – Viewer”</b>, or published to the web):</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <input id="nsheetUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/…" style="flex:1;min-width:260px;background:#fff;border:1px solid var(--line);border-radius:6px;padding:7px 10px;font-size:13px;color:var(--txt);outline:none">
@@ -2762,5 +2790,46 @@ document.addEventListener('click', function(e){
 
 </script>
 
+
+<script>
+/* ── access control ── */
+(function(){
+  var ADMIN_PW = 'Signal-OkErwp!20';
+  var USER_PW  = 'Beacon994';
+
+  function applyRole(role){
+    document.body.classList.remove('role-admin','role-user');
+    document.body.classList.add('authed');
+    document.body.classList.add(role === 'admin' ? 'role-admin' : 'role-user');
+  }
+
+  var existing = sessionStorage.getItem('lict_role');
+  if(existing === 'admin' || existing === 'user'){
+    applyRole(existing);
+  }
+
+  var form = document.getElementById('authForm');
+  var pwInput = document.getElementById('authPw');
+  var err = document.getElementById('authErr');
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var v = pwInput.value;
+    var role = v === ADMIN_PW ? 'admin' : v === USER_PW ? 'user' : null;
+    if(!role){
+      err.textContent = 'Incorrect password.';
+      pwInput.value = '';
+      pwInput.focus();
+      return;
+    }
+    sessionStorage.setItem('lict_role', role);
+    applyRole(role);
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', function(){
+    sessionStorage.removeItem('lict_role');
+    location.reload();
+  });
+})();
+</script>
 </body>
 </html>
