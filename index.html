@@ -940,37 +940,7 @@ body:not(.authed) #logoutBtn{display:none}
       <div class="legend" id="nlgRings"></div>
     </div>
 
-    <div class="card c4">
-      <h3>Tower type breakdown</h3>
-      <div class="ch"><canvas id="nchTowerType"></canvas></div>
-    </div>
-
-    <div class="card c4">
-      <h3>Site type <em>roof top vs ground</em></h3>
-      <div class="ch"><canvas id="nchSiteType"></canvas></div>
-      <div class="legend" id="nlgSiteType"></div>
-    </div>
-
-    <div class="card c6">
-      <h3>Operator split</h3>
-      <div class="ch"><canvas id="nchOperator"></canvas></div>
-      <div class="legend" id="nlgOperator"></div>
-    </div>
-
-    <div class="card c6">
-      <h3>TSSR (Nokia) status</h3>
-      <div class="ch"><canvas id="nchTssrNokia"></canvas></div>
-    </div>
-
-    <div class="card c6">
-      <h3>Tower height distribution <em>meters</em></h3>
-      <div class="ch"><canvas id="nchTowerHeight"></canvas></div>
-    </div>
-
-    <div class="card c6">
-      <h3>Current antenna load <em>m² per sector</em></h3>
-      <div class="ch"><canvas id="nchAntenna"></canvas></div>
-    </div>
+    <!-- Tower type breakdown / Site type / Operator split / TSSR (Nokia) status / Tower height / Current antenna load charts removed (2026-09) — may be replaced with different charts later -->
 
     <div class="card c12">
       <h3>Site register <em id="ntblNote"></em></h3>
@@ -2382,52 +2352,7 @@ function draw(){
   });
 
 
-  /* tower type breakdown */
-  const ttCount={};
-  d.forEach(r=>{ttCount[r.tt]=(ttCount[r.tt]||0)+1;});
-  const tte=Object.entries(ttCount).sort((a,b)=>b[1]-a[1]);
-  mk('chTowerType',{type:'bar',data:{labels:tte.map(e=>e[0]),datasets:[{data:tte.map(e=>e[1]),backgroundColor:tte.map(e=>e[0]==='No Info'?C.gray+'99':NOK+'cc'),borderRadius:4}]},
-    options:{indexAxis:'y',maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:C.line}},y:{grid:{display:false}}}}});
-
-  /* site type donut */
-  const stCount={'Roof Top':0,'Ground Tower':0,'No Info':0};
-  d.forEach(r=>stCount[r.st]=(stCount[r.st]||0)+1);
-  mk('chSiteType',{type:'doughnut',data:{labels:Object.keys(stCount),datasets:[{data:Object.values(stCount),backgroundColor:[C.blue,C.amber,C.gray],borderColor:'#ffffff',borderWidth:2}]},
-    options:{maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false}}}});
-  $('nlgSiteType').innerHTML=[['Roof Top',C.blue],['Ground Tower',C.amber],['No Info',C.gray]]
-    .map(([l,c])=>`<span><i style="background:${c}"></i>${l} <b style="color:var(--txt)">${stCount[l]}</b></span>`).join('');
-
-  /* operator split */
-  const rgCount={'Libyana':0,'LTT':0,'TBD':0};
-  d.forEach(r=>rgCount[r.rg]=(rgCount[r.rg]||0)+1);
-  mk('chOperator',{type:'doughnut',data:{labels:Object.keys(rgCount),datasets:[{data:Object.values(rgCount),backgroundColor:[NOK,C.cyan,C.gray],borderColor:'#ffffff',borderWidth:2}]},
-    options:{maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false}}}});
-  $('nlgOperator').innerHTML=[['Libyana',NOK],['LTT',C.cyan],['TBD',C.gray]]
-    .map(([l,c])=>`<span><i style="background:${c}"></i>${l} <b style="color:var(--txt)">${rgCount[l]}</b></span>`).join('');
-
-  /* TSSR (Nokia) status */
-  const tnCount={'Done':0,'In Progress':0,'Cancelled':0,'Pending':0};
-  d.forEach(r=>tnCount[r.tn]=(tnCount[r.tn]||0)+1);
-  mk('chTssrNokia',{type:'bar',data:{labels:Object.keys(tnCount),datasets:[{data:Object.values(tnCount),backgroundColor:[C.cyan+'cc',C.amber+'cc',C.red+'cc',C.gray+'99'],borderRadius:4}]},
-    options:{maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:C.line}},x:{grid:{display:false}}}}});
-
-  /* tower height distribution */
-  const thBins=[[0,15,'<15'],[15,25,'15-25'],[25,35,'25-35'],[35,45,'35-45'],[45,200,'45+'],[null,null,'No Info']];
-  const thCounts=thBins.map(([lo,hi])=>{
-    if(lo===null) return d.filter(r=>r.th==null).length;
-    return d.filter(r=>r.th!=null && r.th>=lo && r.th<hi).length;
-  });
-  mk('chTowerHeight',{type:'bar',data:{labels:thBins.map(b=>b[2]),datasets:[{data:thCounts,backgroundColor:thBins.map(b=>b[2]==='No Info'?C.gray+'99':NOK+'cc'),borderRadius:4}]},
-    options:{maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:C.line}},x:{grid:{display:false}}}}});
-
-  /* current antenna load distribution */
-  const antBins=[[0,2.5,'<2.5'],[2.5,3,'2.5-3'],[3,4,'3-4'],[4,6,'4-6'],[6,200,'6+'],[null,null,'No Info']];
-  const antCounts=antBins.map(([lo,hi])=>{
-    if(lo===null) return d.filter(r=>r.ant==null).length;
-    return d.filter(r=>r.ant!=null && r.ant>=lo && r.ant<hi).length;
-  });
-  mk('chAntenna',{type:'bar',data:{labels:antBins.map(b=>b[2]),datasets:[{data:antCounts,backgroundColor:antBins.map(b=>b[2]==='No Info'?C.gray+'99':C.cyan+'cc'),borderRadius:4}]},
-    options:{maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{grid:{color:C.line}},x:{grid:{display:false}}}}});
+  /* Tower type breakdown / Site type donut / Operator split / TSSR (Nokia) status / Tower height / Current antenna load charts removed (2026-09) — may be replaced with different charts later */
 
   /* table */
   const cap=150, show=d.slice(0,cap);
